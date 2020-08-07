@@ -1,0 +1,26 @@
+- hosts: localhost
+  connection: local
+  vars:
+    
+
+  tasks:
+
+    -   name: Install Role Postfix
+        local_action: command ansible-galaxy install -f geerlingguy.postfix
+
+    -   name: Applying role Postfix
+        command: mv ~/.ansible/roles/geerlingguy.postfix ~/.ansible/roles/pwslab.postfix
+        ignore_errors: yes
+
+    -   name: Update apt cache.
+        apt: update_cache=true cache_valid_time=600
+        when: ansible_os_family == 'Debian'
+
+    -   name: Override postfix_inet_protocols (RHEL).
+        set_fact:
+            postfix_inet_protocols: ipv4
+        when: ansible_os_family == 'RedHat'
+
+    -   name: Installing Postfix
+        include_role:
+            name: pwslab.postfix
